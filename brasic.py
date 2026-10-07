@@ -98,7 +98,7 @@ class Lexer:
                 self.advance()
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
-                self.advance()
+                #self.advance()
             elif self.current_char == "+":
                 tokens.append(Token(TT_PLUS))
                 self.advance()
@@ -133,6 +133,7 @@ class Lexer:
                 if dot_count == 1: break
                 dot_count += 1
                 num_str += "."
+                self.advance()
             else:
                 num_str += self.current_char
                 self.advance()
