@@ -2,9 +2,9 @@ import brasic
 
 while True:
     text = input("Brasic -> ")
-    result, error = brasic.run(text)
+    result, error = brasic.run("<stdin>", text)
 
     if error:
-        print(error.as_string)
+        print(error.as_string())
     else:
         print(result)
