@@ -18,6 +18,14 @@ LETTERS = string.ascii_letters + 'áéíóúÁÉÍÓÚñÑüÜ'
 LETTERS_DIGITS = LETTERS + DIGITS
 
 #######################################
+# Comprobar .bras
+#######################################
+
+def extension_correcta(ruta):
+    _, extension = os.path.splitext(ruta)
+    return extension.lower() == ".bras"
+
+#######################################
 # ERRORS
 #######################################
 
@@ -45,6 +53,10 @@ class ExpectedCharError(Error):
 class InvalidSyntaxError(Error):
   def __init__(self, pos_start, pos_end, details=''):
     super().__init__(pos_start, pos_end, 'Syntax Invalida', details)
+
+class InvalidExtensionError(Error):
+  def __init__(self, pos_start, pos_end, details=''):
+    super().__init__(pos_start, pos_end, 'Extensión Invalida', details)
 
 class RTError(Error):
   def __init__(self, pos_start, pos_end, details, context):
@@ -1819,38 +1831,52 @@ class BuiltInFunction(BaseFunction):
 
     return RTResult().success(Number(len(list_.elements)))
   execute_len.arg_names = ["list"]
-
+# EDITAR
   def execute_run(self, exec_ctx):
     fn = exec_ctx.symbol_table.get("fn")
 
     if not isinstance(fn, String):
-      return RTResult().failure(RTError(
-        self.pos_start, self.pos_end,
-        "El segundo argumento ha de ser una str",
-        exec_ctx
-      ))
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            "El argumento ha de ser un texto",
+            exec_ctx
+        ))
 
     fn = fn.value
 
+    if not extension_correcta(fn):
+        _, extension = os.path.splitext(fn)
+
+        return RTResult().failure(RTError(
+            self.pos_start,
+            self.pos_end,
+            InvalidExtensionError(
+                self.pos_start,
+                self.pos_end,
+                f"Se esperaba '.bras', pero se recibió '{extension}'."
+            ).as_string(),
+            exec_ctx
+        ))
+
     try:
-      with open(fn, "r") as f:
-        script = f.read()
-    except Exception as e:
-      return RTResult().failure(RTError(
-        self.pos_start, self.pos_end,
-        f"Error al cargar  \"{fn}\"\n" + str(e),
-        exec_ctx
-      ))
+        with open(fn, "r", encoding="utf-8") as f:
+            script = f.read()
+    except OSError as e:
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            f"Error al cargar '{fn}': {e}",
+            exec_ctx
+        ))
 
     _, error = run(fn, script)
-    
+
     if error:
-      return RTResult().failure(RTError(
-        self.pos_start, self.pos_end,
-        f"Error al terminar de ejecutar \"{fn}\"\n" +
-        error.as_string(),
-        exec_ctx
-      ))
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            f"Error al terminar de ejecutar '{fn}':\n"
+            + error.as_string(),
+            exec_ctx
+        ))
 
     return RTResult().success(Number.null)
   execute_run.arg_names = ["fn"]
