@@ -1,5 +1,0 @@
-muestra("HOLAA")
-
-VAR test = escribe("Como estas")
-
-muestra(test)

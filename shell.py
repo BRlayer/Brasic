@@ -1,7 +1,9 @@
 import brasic
 
 while True:
-	text = input('basic > ')
+	print()
+	text = input('brasic_console > ')
+	print()
 	if text.strip() == "": continue
 	result, error = brasic.run('<stdin>', text)
 
@@ -9,6 +11,8 @@ while True:
 		print(error.as_string())
 	elif result:
 		if len(result.elements) == 1:
-			print(repr(result.elements[0]))
+			value = result.elements[0]
+			if repr(value) != "0":
+				print(repr(value))
 		else:
 			print(repr(result))
