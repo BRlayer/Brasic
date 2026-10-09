@@ -1,435 +1,161 @@
-# Brasic V1.0
+# Brasic
 
-Brasic es un lenguaje de programación interpretado con palabras clave en
-español. Los programas se guardan en archivos `.bras` y se
-pueden ejecutar desde la consola de Brasic mediante
-`EJECUTAR("archivo.bras")`.
+**Brasic** es un lenguaje de programación en desarrollo, creado con Python, cuyo objetivo es facilitar el aprendizaje de la programación a personas que están empezando, especialmente a hablantes de español.
 
-> Esta guía se basa en las funciones y la sintaxis presentes en el
-> código actual de Brasic. Algunas características pueden variar si el
-> intérprete cambia.
+El proyecto busca ofrecer una forma más intuitiva de comprender cómo funciona un lenguaje de programación, utilizando palabras y conceptos familiares para reducir la barrera inicial de aprendizaje. Además de servir como herramienta educativa, Brasic es un proyecto para explorar cómo se construye un lenguaje de programación desde cero.
 
-## Índice
+> Brasic no pretende sustituir a Python ni a otros lenguajes establecidos. Su propósito es servir como punto de partida para comprender sus fundamentos y facilitar la transición hacia lenguajes más complejos.
 
--   [Ejecutar Brasic](#ejecutar-brasic)
--   [Sintaxis básica](#sintaxis-básica)
--   [Variables y tipos](#variables-y-tipos)
--   [Operadores](#operadores)
--   [Condicionales](#condicionales)
--   [Bucles](#bucles)
--   [Funciones propias](#funciones-propias)
--   [Funciones integradas](#funciones-integradas)
--   [Añadir una función integrada](#añadir-una-función-integrada)
--   [Errores comunes](#errores-comunes)
+## ¿Por qué se ha creado?
 
-## Ejecutar Brasic
+Aprender a programar puede resultar complicado al principio. Además de comprender la lógica y resolver problemas, los principiantes deben familiarizarse con una sintaxis nueva, conceptos abstractos y palabras clave que no siempre les resultan intuitivas.
 
-Desde la carpeta del proyecto, inicia la consola:
+Brasic nace para reducir esa dificultad inicial mediante tres objetivos:
 
-``` bash
-python shell.py
+* **Facilitar el aprendizaje:** introducir los fundamentos de la programación de forma progresiva.
+* **Acercar el código al español:** explorar el uso de palabras clave en español para que los principiantes puedan relacionar el código con conceptos que ya conocen.
+* **Comprender antes de avanzar:** ayudar a construir una base sólida antes de pasar a lenguajes con ecosistemas, sintaxis y características más complejos.
+
+El objetivo no es eliminar la necesidad de aprender conceptos técnicos, sino hacer que el primer contacto con ellos sea más accesible.
+
+## Filosofía del proyecto
+
+Brasic se desarrolla con un enfoque educativo y experimental. La idea es que el usuario no solo aprenda a escribir código, sino que también pueda comprender qué ocurre detrás de él.
+
+Por eso, el proyecto se construye a partir de componentes propios, como el analizador léxico (*lexer*), el analizador sintáctico (*parser*) y el árbol de sintaxis abstracta (*AST*).
+
+Estos componentes permiten estudiar cómo una expresión escrita por el usuario se transforma en una estructura que el intérprete puede procesar.
+
+El proyecto está en desarrollo, por lo que su sintaxis, sus funcionalidades y su arquitectura pueden cambiar con el tiempo.
+
+## Estructura y funcionamiento interno
+
+Brasic está escrito en Python. Su arquitectura se organiza en componentes que procesan el código en distintas etapas.
+
+| Componente | Función                                                                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Lexer      | Lee el texto de entrada y lo transforma en tokens, como números y operadores.                                           |
+| Parser     | Analiza la secuencia de tokens y construye una estructura que representa la expresión.                                  |
+| AST        | Representa las expresiones mediante nodos, como números y operaciones binarias.                                         |
+| Intérprete | Será el encargado de ejecutar las estructuras generadas y producir resultados, según las funcionalidades implementadas. |
+
+Actualmente, el proyecto incluye las bases del análisis léxico y sintáctico. Las capacidades de ejecución dependen del estado de desarrollo del intérprete.
+
+## Modificar y ampliar Brasic
+
+Brasic está diseñado como un proyecto que se puede estudiar, modificar y ampliar. Si conoces Python, puedes experimentar con su implementación y añadir nuevas funcionalidades.
+
+### 1. Comprender el código existente
+
+Antes de introducir cambios, conviene familiarizarse con el flujo de ejecución:
+
+1. `shell.py` recibe el texto que escribe el usuario.
+2. `brasic.py` procesa ese texto mediante el lexer.
+3. El parser organiza los tokens en una estructura sintáctica.
+4. Los componentes posteriores podrán interpretar esa estructura y ejecutar las operaciones correspondientes.
+
+Los nombres y la organización exacta de los archivos pueden cambiar a medida que evolucione el proyecto.
+
+### 2. Añadir una función integrada (*built-in*)
+
+Una función integrada es una función que forma parte del propio lenguaje y que el usuario puede ejecutar directamente desde el código de Brasic.
+
+Para añadir una función integrada personalizada, hay que modificar la clase `BuiltInFunction` y registrar la función en la tabla de símbolos global. El proceso se divide en tres pasos.
+
+#### Paso 1. Crear la función dentro de `BuiltInFunction`
+
+Dentro de la clase `BuiltInFunction`, crea un método cuyo nombre siga este formato:
+
+```python
+def execute_nombre(self, ...):
 ```
 
-Aparecerá el indicador:
+Sustituye `nombre` por el nombre interno que quieras dar a la función. Los parámetros del método dependerán de la estructura que utilice tu clase.
 
-``` text
-brasic_console >
+**Importante:** la mayor parte del código de una función integrada suele estar dedicada a comprobar errores. Estas comprobaciones permiten verificar que los argumentos sean válidos, que tengan los tipos correctos y que se cumplan las condiciones necesarias antes de ejecutar la operación.
+
+El código que realiza la función propiamente dicha suele encontrarse al final del método, una vez superadas las comprobaciones.
+
+
+Justo debajo de la definición de la función, añade:
+
+```python
+execute_nombre.arg_names = [argumentos]
 ```
 
-Puedes escribir instrucciones directamente o ejecutar un archivo:
+Sustituye `nombre` por el nombre utilizado en `execute_nombre` y `argumentos` por los nombres de los argumentos que deberá recibir la función.
 
-``` bras
-IMPRIMIR("Hola Mundo!")
+Por ejemplo, si la función recibe dos argumentos llamados `texto` y `veces`:
+
+```python
+execute_repetir.arg_names = ["texto", "veces"]
 ```
 
-Guarda tus programas en archivos con extensión `.bras`. Si una
-instrucción ocupa una línea nueva, el intérprete la reconoce como una
-nueva sentencia. También admite `;` como separador de sentencias. 
-Los comentarios empiezan con `#`.
+Esta lista permite al sistema conocer los nombres de los argumentos que acepta la función.
 
-## Sintaxis básica
+#### Paso 2. Registrar la función en `BuiltInFunction`
 
-### Mostrar texto y calcular
+Justo debajo de la clase `BuiltInFunction`, añade:
 
-``` bras
-IMPRIMIR("Hola, mundo!")
-IMPRIMIR(2 + 3 * 4)
-IMPRIMIR(2 ^ 3)
+```python
+BuiltInFunction.nombre = BuiltInFunction(nombre)
 ```
 
-### Variables
+Sustituye `nombre` por el nombre que quieras asignar a la función.
 
-Las variables se declaran con `VAR`:
+**Importante:** en este caso, el nombre no debe llevar el prefijo `execute_`. Debe ser únicamente la parte del nombre que identifica la función.
 
-``` bras
-VAR nombre = "Paco"
-VAR edad = 18
-VAR precio = 3.5
+Por ejemplo, si has creado `execute_repetir`, debes registrar la función así:
 
-IMPRIMIR(nombre)
-IMPRIMIR(edad)
+```python
+BuiltInFunction.repetir = BuiltInFunction("repetir")
 ```
 
-### Tipos y valores
+De esta manera, `BuiltInFunction.repetir` representa la función integrada que acabas de crear.
 
-Los valores que reconoce el intérprete incluyen:
+#### Paso 3. Añadir la función a la tabla de símbolos global
 
--   Números enteros y decimales, por ejemplo `10` y `3.14`.
--   Texto entre comillas dobles, por ejemplo `"Hola"`.
--   Listas entre corchetes, por ejemplo `[1, 2, 3]`.
--   `VERDADERO` y `FALSO`, que representan valores booleanos.
--   `NULL`, el valor nulo.
+Por último, justo encima de la función `run`, añade:
 
-Las cadenas admiten secuencias como `\n` para salto de línea y `\t` para
-tabulación.
-
-### Listas
-
-``` bras
-VAR numeros = [10, 20, 30]
-IMPRIMIR(numeros)
-IMPRIMIR(LARGO(numeros))
-AÑADIR(numeros, 40)
-IMPRIMIR(numeros)
+```python
+global_symbol_table.set("NOMBRE", BuiltInFunction.nombre)
 ```
 
-## Operadores
+Sustituye `nombre` por el nombre utilizado al registrar la función en `BuiltInFunction.nombre` y `NOMBRE` por el identificador que se utilizará para invocarla desde el código de Brasic.
 
-  Categoría     Operadores
-  ------------- ----------------------------------
-  Aritmética    `+`, `-`, `*`, `/`, `^`
-  Comparación   `==`, `!=`, `<`, `>`, `<=`, `>=`
-  Lógica        `Y`, `O`, `NO`
+Por ejemplo, si en el paso anterior has registrado `BuiltInFunction.repetir`, puedes añadir:
 
-Ejemplo:
-
-``` bras
-VAR puntos = 12
-IMPRIMIR(puntos >= 10 Y puntos < 20)
+```python
+global_symbol_table.set("REPETIR", BuiltInFunction.repetir)
 ```
 
-## Condicionales
+En este ejemplo, `REPETIR` será el nombre que reconocerá el entorno global de Brasic.
 
-Las palabras clave para condiciones son `SI`, `ENTONCES`, `SINOS`,
-`SINO` y `FIN`.
+**Recuerda la diferencia entre los nombres:**
 
-Ejemplo de una condición en una sola línea:
+* `execute_repetir`: nombre del método que implementa el comportamiento de la función.
+* `BuiltInFunction.repetir`: nombre con el que se registra la función dentro de la clase.
+* `"REPETIR"`: identificador con el que se expone la función al código de Brasic.
 
-``` bras
-SI edad >= 18 ENTONCES IMPRIMIR("Mayor de edad") SINO IMPRIMIR("Menor de edad")
-```
+Una vez completados los tres pasos, la función estará registrada para que el intérprete pueda acceder a ella, siempre que el sistema de ejecución y el parser admitan correctamente las llamadas a funciones.
 
-Ejemplo en varias líneas:
 
-``` bras
-SI edad >= 18 ENTONCES
-    IMPRIMIR("Mayor de edad")
-SINO
-    IMPRIMIR("Menor de edad")
-FIN
-```
+### 3. Funcionalidades
 
-También puedes encadenar condiciones con `SINOS`:
+## Manual de uso
 
-``` bras
-SI nota >= 9 ENTONCES
-    IMPRIMIR("Excelente")
-SINOS nota >= 5 ENTONCES
-    IMPRIMIR("Aprobado")
-SINO
-    IMPRIMIR("Suspendido")
-FIN
-```
+El funcionamiento del lenguaje, los ejemplos de código y las instrucciones para utilizar las funcionalidades disponibles se explican en el manual de uso del proyecto.
 
-## Bucles
+Consulta ese documento para aprender a utilizar Brasic. Este README se centra en presentar el proyecto y orientar a quienes quieran estudiar o modificar su implementación.
 
-### `MIENTRAS`
+[Consultar el manual de uso](./MANUAL.md)
 
-Repite el bloque mientras la condición sea verdadera:
+## Estado del proyecto
 
-``` bras
-VAR i = 1
-MIENTRAS i <= 5 ENTONCES
-    IMPRIMIR(i)
-    VAR i = i + 1
-FIN
-```
+Brasic se encuentra en desarrollo. Su objetivo es evolucionar de manera progresiva, incorporando funcionalidades mientras se mantiene el enfoque educativo y la posibilidad de estudiar cómo funciona internamente un lenguaje de programación.
 
-### `PARA`
+Las características disponibles deben entenderse según la implementación actual, no como una lista de funcionalidades futuras garantizadas.
 
-El bucle `PARA` usa `HASTA` y, opcionalmente, `PASO`:
+## Contribuciones
 
-``` bras
-PARA i = 0 HASTA 5 ENTONCES
-    IMPRIMIR(i)
-FIN
-```
-
-Con un paso explícito:
-
-``` bras
-PARA i = 0 HASTA 10 PASO 2 ENTONCES
-    IMPRIMIR(i)
-FIN
-```
-
-Dentro de los bucles, `ROMPER` sale del bucle y `CONTINUAR` pasa a la
-siguiente iteración.
-
-## Funciones propias
-
-Se declaran con `FUNCION`. Para devolver un valor explícitamente,
-utiliza `DEVOLVER`.
-
-Función de una línea:
-
-``` bras
-FUNCION doble(x) -> x * 2
-IMPRIMIR(doble(5))
-```
-
-Función con cuerpo de varias líneas:
-
-``` bras
-FUNCION sumar(a, b)
-    DEVOLVER a + b
-FIN
-
-IMPRIMIR(sumar(3, 4))
-```
-
-Los argumentos se separan con comas y las funciones se llaman con
-paréntesis.
-
-## Funciones integradas
-
-Los nombres siguientes están registrados en la tabla global del
-intérprete.
-
-  ---------------------------------------------------------------------------------------
-  Función o valor               Uso                               Descripción
-  ----------------------------- --------------------------------- -----------------------
-  `IMPRIMIR(valor)`             `IMPRIMIR("Hola")`                Muestra un valor en la
-                                                                  salida y devuelve el
-                                                                  valor nulo.
-
-  `IMPRIMIR_RET(valor)`         `VAR texto = IMPRIMIR_RET(123)`   Devuelve el valor
-                                                                  convertido a texto, sin
-                                                                  imprimirlo por sí
-                                                                  misma.
-
-  `ENTRADA()`                   `VAR nombre = ENTRADA()`          Lee una línea de texto
-                                                                  introducida por el
-                                                                  usuario.
-
-  `ENTRADA_INT()`               `VAR edad = ENTRADA_INT()`        Lee una entrada hasta
-                                                                  obtener un entero
-                                                                  válido.
-
-  `ALEATORIO(minimo, maximo)`   `ALEATORIO(1, 6)`                 Devuelve un entero
-                                                                  aleatorio entre ambos
-                                                                  límites, incluidos.
-
-  `EJECUTAR(archivo)`           `EJECUTAR("otro.bras")`           Lee y ejecuta el
-                                                                  archivo indicado.
-
-  `LIMPIAR()`                   `LIMPIAR()`                       Limpia la terminal.
-
-  `CLS()`                       `CLS()`                           Alias de `LIMPIAR()`.
-
-  `ES_NUMERO(valor)`            `ES_NUMERO(42)`                   Devuelve `VERDADERO` si
-                                                                  el valor es un número.
-
-  `ES_TEXTO(valor)`             `ES_TEXTO("hola")`                Devuelve `VERDADERO` si
-                                                                  el valor es texto.
-
-  `ES_LISTA(valor)`             `ES_LISTA([1, 2])`                Devuelve `VERDADERO` si
-                                                                  el valor es una lista.
-
-  `ES_FUN(valor)`               `ES_FUN(mi_funcion)`              Devuelve `VERDADERO` si
-                                                                  el valor es una
-                                                                  función.
-
-  `AÑADIR(lista, valor)`        `AÑADIR(datos, 4)`                Añade un elemento al
-                                                                  final de una lista.
-
-  `SACAR(lista, indice)`        `SACAR(datos, 0)`                 Elimina y devuelve el
-                                                                  elemento situado en el
-                                                                  índice indicado.
-
-  `EXTENDER(listaA, listaB)`    `EXTENDER(a, b)`                  Añade a la primera
-                                                                  lista los elementos de
-                                                                  la segunda.
-
-  `LARGO(lista)`                `LARGO([1, 2, 3])`                Devuelve el número de
-                                                                  elementos de una lista.
-  ---------------------------------------------------------------------------------------
-
-Valores globales:
-
-  Nombre        Descripción
-  ------------- ----------------------------
-  `NULL`        Valor nulo del intérprete.
-  `VERDADERO`   Valor booleano verdadero.
-  `FALSO`       Valor booleano falso.
-  `MATH_PI`     Constante matemática π.
-
-### Notas sobre las funciones integradas
-
--   `ALEATORIO` requiere dos números y el límite mínimo no puede superar
-    al máximo.
--   `AÑADIR`, `SACAR`, `EXTENDER` y `LARGO` esperan listas en los
-    argumentos indicados.
--   `EJECUTAR` recibe una ruta como texto. La ruta se interpreta
-    respecto al directorio de trabajo desde el que se ejecuta Python.
--   Las funciones que realizan una acción, como `IMPRIMIR` o `AÑADIR`,
-    normalmente devuelven `NULL` (que la consola actual puede mostrar
-    como `0`).
-
-## Añadir una función integrada
-
-Las funciones integradas se implementan en Python dentro de la clase
-`BuiltInFunction` y después se registran en `global_symbol_table`.
-
-Este es el procedimiento general.
-
-### 1. Crear el método de ejecución
-
-Por ejemplo, vamos a añadir `CUADRADO(numero)`, que devuelve el cuadrado
-de un número.
-
-Dentro de `class BuiltInFunction`, añade:
-
-``` python
-def execute_square(self, exec_ctx):
-    numero = exec_ctx.symbol_table.get("numero")
-
-    if not isinstance(numero, Number):
-        return RTResult().failure(RTError(
-            self.pos_start,
-            self.pos_end,
-            "El argumento debe ser un número.",
-            exec_ctx
-        ))
-
-    return RTResult().success(Number(numero.value ** 2))
-
-execute_square.arg_names = ["numero"]
-```
-
-Puntos importantes:
-
--   `exec_ctx.symbol_table.get("numero")` obtiene el argumento por
-    nombre.
--   `arg_names` define los nombres y el número de argumentos que
-    recibirá la función.
--   Comprueba los tipos de los argumentos antes de operar con ellos.
--   Devuelve el resultado mediante `RTResult().success(...)`.
--   Si ocurre un error, devuelve `RTResult().failure(RTError(...))`.
-
-### 2. Crear la instancia de la función integrada
-
-En la sección donde se crean las instancias de `BuiltInFunction`, añade:
-
-``` python
-BuiltInFunction.square = BuiltInFunction("square")
-```
-
-El nombre `"square"` debe coincidir con el sufijo del método
-`execute_square`.
-
-### 3. Registrar el nombre que verá el usuario de Brasic
-
-En la sección de `global_symbol_table`, añade:
-
-``` python
-global_symbol_table.set("CUADRADO", BuiltInFunction.square)
-```
-
-Este paso es imprescindible: si lo omites, Brasic no reconocerá
-`CUADRADO` y mostrará un error indicando que no está definida.
-
-### 4. Probar la función
-
-Reinicia la consola de Brasic y ejecuta:
-
-``` bras
-IMPRIMIR(CUADRADO(5))
-```
-
-Resultado esperado:
-
-``` text
-25
-```
-
-### Añadir una función con dos argumentos
-
-El patrón es el mismo que el de `ALEATORIO`:
-
-``` python
-def execute_sumar_numeros(self, exec_ctx):
-    a = exec_ctx.symbol_table.get("a")
-    b = exec_ctx.symbol_table.get("b")
-
-    if not isinstance(a, Number) or not isinstance(b, Number):
-        return RTResult().failure(RTError(
-            self.pos_start,
-            self.pos_end,
-            "Los argumentos deben ser números.",
-            exec_ctx
-        ))
-
-    return RTResult().success(Number(a.value + b.value))
-
-execute_sumar_numeros.arg_names = ["a", "b"]
-```
-
-Después crea y registra la función:
-
-``` python
-BuiltInFunction.sumar_numeros = BuiltInFunction("sumar_numeros")
-global_symbol_table.set("SUMAR_NUMEROS", BuiltInFunction.sumar_numeros)
-```
-
-Y úsala en Brasic:
-
-``` bras
-IMPRIMIR(SUMAR_NUMEROS(7, 8))
-```
-
-Resultado esperado:
-
-``` text
-15
-```
-
-## Errores comunes
-
--   **`'NOMBRE' no se ha definido`:** revisa que la función esté
-    registrada en `global_symbol_table` y que el nombre coincida
-    exactamente.
--   **Número incorrecto de argumentos:** revisa la lista `arg_names`.
--   **Tipo de argumento incorrecto:** valida el tipo con `isinstance`,
-    como hacen `ALEATORIO` y las funciones de listas.
--   **El archivo no se encuentra:** comprueba el directorio de trabajo y
-    la ruta que pasas a `EJECUTAR`.
--   **Aparece `0` después de una función que imprime:** puede ser el
-    valor nulo que devuelve esa función y que la consola representa como
-    `0`.
-
-## Contribuir
-
-Al añadir una función integrada:
-
-1.  Implementa `execute_nombre` en `BuiltInFunction`.
-2.  Define `execute_nombre.arg_names`.
-3.  Crea la instancia
-    `BuiltInFunction.nombre = BuiltInFunction("nombre")`.
-4.  Registra el nombre público en `global_symbol_table`.
-5.  Prueba casos válidos, tipos incorrectos y límites.
-6.  Documenta la función en la tabla de funciones integradas.
-
-------------------------------------------------------------------------
-
-**Brasic** --- un lenguaje interpretado en desarrollo.
+Las propuestas, mejoras y experimentos son bienvenidos. Si quieres ampliar Brasic, procura que los cambios mantengan el objetivo principal del proyecto: facilitar el aprendizaje de la programación y hacer comprensible el funcionamiento interno del lenguaje.
