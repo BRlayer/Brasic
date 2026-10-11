@@ -52,34 +52,52 @@ class ExpectedCharError(Error):
 
 class InvalidSyntaxError(Error):
   def __init__(self, pos_start, pos_end, details=''):
-    super().__init__(pos_start, pos_end, 'Syntax Invalida', details)
+    super().__init__(pos_start, pos_end, 'Syntaxis Invalida', details)
 
 class InvalidExtensionError(Error):
   def __init__(self, pos_start, pos_end, details=''):
     super().__init__(pos_start, pos_end, 'Extensión Invalida', details)
 
+
 class RTError(Error):
   def __init__(self, pos_start, pos_end, details, context):
-    super().__init__(pos_start, pos_end, 'Error Ejecución', details)
+    super().__init__(pos_start, pos_end, 'Error de ejecución', details)
     self.context = context
 
   def as_string(self):
-    result  = self.generate_traceback()
-    result += f'{self.error_name}: {self.details}'
-    result += '\n\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
+    result = f'{self.error_name}: {self.details}\n'
+    result += f'Archivo: {self.pos_start.fn}\n'
+    result += f'Línea: {self.pos_start.ln + 1}'
+
+    traceback = self.generate_traceback()
+
+    if traceback:
+      result += '\n\nLlamadas:\n' + traceback
+
+    result += '\n\n'
+    result += string_with_arrows(
+      self.pos_start.ftxt,
+      self.pos_start,
+      self.pos_end
+    )
+
     return result
 
   def generate_traceback(self):
-    result = ''
+    calls = []
     pos = self.pos_start
     ctx = self.context
 
     while ctx:
-      result = f'  File {pos.fn}, line {str(pos.ln + 1)}, in {ctx.display_name}\n' + result
+      calls.append(
+        f'  {ctx.display_name} '
+        f'(archivo {pos.fn}, línea {pos.ln + 1})'
+      )
       pos = ctx.parent_entry_pos
       ctx = ctx.parent
 
-    return 'Traceback (most recent call last):\n' + result
+    return '\n'.join(reversed(calls))
+
 
 #######################################
 # POSITION
@@ -138,6 +156,7 @@ TT_EOF				= 'EOF'
 
 KEYWORDS = [
   'VAR',
+  'GLOBAL',
   'Y',
   'O',
   'NO',
@@ -411,13 +430,22 @@ class VarAccessNode:
     self.pos_start = self.var_name_tok.pos_start
     self.pos_end = self.var_name_tok.pos_end
 
+
 class VarAssignNode:
-  def __init__(self, var_name_tok, value_node):
+  def __init__(self, var_name_tok, value_node, is_declaration=False):
     self.var_name_tok = var_name_tok
     self.value_node = value_node
+    self.is_declaration = is_declaration
 
     self.pos_start = self.var_name_tok.pos_start
     self.pos_end = self.value_node.pos_end
+
+
+class GlobalNode:
+  def __init__(self, var_name_tok):
+    self.var_name_tok = var_name_tok
+    self.pos_start = var_name_tok.pos_start
+    self.pos_end = var_name_tok.pos_end
 
 class BinOpNode:
   def __init__(self, left_node, op_tok, right_node):
@@ -577,14 +605,30 @@ class Parser:
     if self.tok_idx >= 0 and self.tok_idx < len(self.tokens):
       self.current_tok = self.tokens[self.tok_idx]
 
+  
   def parse(self):
     res = self.statements()
+
     if not res.error and self.current_tok.type != TT_EOF:
+      if self.current_tok.type == TT_EQ:
+        mensaje = (
+          "No se esperaba '=' en esta posición. "
+          "Comprueba que el nombre de la variable sea válido."
+        )
+      else:
+        mensaje = (
+          f"Token inesperado: '{self.current_tok.value}'. "
+          "No se esperaba este elemento después de la expresión."
+        )
+
       return res.failure(InvalidSyntaxError(
-        self.current_tok.pos_start, self.current_tok.pos_end,
-        "Token cannot appear after previous tokens"
+        self.current_tok.pos_start,
+        self.current_tok.pos_end,
+        mensaje
       ))
+
     return res
+
 
   ###################################
 
@@ -630,6 +674,22 @@ class Parser:
     res = ParseResult()
     pos_start = self.current_tok.pos_start.copy()
 
+    if self.current_tok.matches(TT_KEYWORD, 'GLOBAL'):
+      res.register_advancement()
+      self.advance()
+
+      if self.current_tok.type != TT_IDENTIFIER:
+        return res.failure(InvalidSyntaxError(
+          self.current_tok.pos_start,
+          self.current_tok.pos_end,
+          "Esperado el nombre de una variable después de GLOBAL"
+        ))
+
+      var_name_tok = self.current_tok
+      res.register_advancement()
+      self.advance()
+      return res.success(GlobalNode(var_name_tok))
+
     if self.current_tok.matches(TT_KEYWORD, 'DEVOLVER'):
       res.register_advancement()
       self.advance()
@@ -657,9 +717,11 @@ class Parser:
       ))
     return res.success(expr)
 
+
   def expr(self):
     res = ParseResult()
 
+    # Declaración: VAR nombre = valor
     if self.current_tok.matches(TT_KEYWORD, 'VAR'):
       res.register_advancement()
       self.advance()
@@ -682,11 +744,42 @@ class Parser:
 
       res.register_advancement()
       self.advance()
+
       expr = res.register(self.expr())
-      if res.error: return res
+      if res.error:
+        return res
+
+      return res.success(VarAssignNode(var_name, expr, is_declaration=True))
+
+    # Reasignación: nombre = valor
+    siguiente_idx = self.tok_idx + 1
+
+    if (
+      self.current_tok.type == TT_IDENTIFIER
+      and siguiente_idx < len(self.tokens)
+      and self.tokens[siguiente_idx].type == TT_EQ
+    ):
+      var_name = self.current_tok
+
+      res.register_advancement()
+      self.advance()  # Avanza hasta '='
+
+      res.register_advancement()
+      self.advance()  # Avanza hasta el valor
+
+      expr = res.register(self.expr())
+      if res.error:
+        return res
+
       return res.success(VarAssignNode(var_name, expr))
 
-    node = res.register(self.bin_op(self.comp_expr, ((TT_KEYWORD, 'Y'), (TT_KEYWORD, 'O'))))
+    # Expresiones normales
+    node = res.register(
+      self.bin_op(
+        self.comp_expr,
+        ((TT_KEYWORD, 'Y'), (TT_KEYWORD, 'O'))
+      )
+    )
 
     if res.error:
       return res.failure(InvalidSyntaxError(
@@ -695,6 +788,7 @@ class Parser:
       ))
 
     return res.success(node)
+
 
   def comp_expr(self):
     res = ParseResult()
@@ -1871,12 +1965,8 @@ class BuiltInFunction(BaseFunction):
     _, error = run(fn, script)
 
     if error:
-        return RTResult().failure(RTError(
-            self.pos_start, self.pos_end,
-            f"Error al terminar de ejecutar '{fn}':\n"
-            + error.as_string(),
-            exec_ctx
-        ))
+      return RTResult().failure(error)
+
 
     return RTResult().success(Number.null)
   execute_run.arg_names = ["fn"]
@@ -1935,6 +2025,7 @@ class Context:
     self.parent = parent
     self.parent_entry_pos = parent_entry_pos
     self.symbol_table = None
+    self.global_vars = set()
 
 #######################################
 # SYMBOL TABLE
@@ -2009,14 +2100,72 @@ class Interpreter:
     value = value.copy().set_pos(node.pos_start, node.pos_end).set_context(context)
     return res.success(value)
 
+  
+  def visit_GlobalNode(self, node, context):
+    res = RTResult()
+    var_name = node.var_name_tok.value
+
+    if context.parent is None:
+      return res.failure(RTError(
+        node.pos_start, node.pos_end,
+        "GLOBAL solo se puede usar dentro de una función.",
+        context
+      ))
+
+    if var_name in context.symbol_table.symbols:
+      return res.failure(RTError(
+        node.pos_start, node.pos_end,
+        f"'{var_name}' ya existe en el ámbito local. "
+        "Declara GLOBAL antes de usar esa variable.",
+        context
+      ))
+
+    if global_symbol_table.get(var_name) is None:
+      return res.failure(RTError(
+        node.pos_start, node.pos_end,
+        f"La variable global '{var_name}' no ha sido declarada.",
+        context
+      ))
+
+    context.global_vars.add(var_name)
+    return res.success(Number.null)
+
+
   def visit_VarAssignNode(self, node, context):
     res = RTResult()
     var_name = node.var_name_tok.value
-    value = res.register(self.visit(node.value_node, context))
-    if res.should_return(): return res
 
-    context.symbol_table.set(var_name, value)
+    if node.is_declaration and var_name in context.global_vars:
+      return res.failure(RTError(
+        node.pos_start, node.pos_end,
+        f"'{var_name}' ya está declarada como GLOBAL en esta función.",
+        context
+      ))
+
+    if (
+      not node.is_declaration
+      and var_name not in context.global_vars
+      and context.symbol_table.get(var_name) is None
+    ):
+      return res.failure(RTError(
+        node.var_name_tok.pos_start,
+        node.var_name_tok.pos_end,
+        f"La variable '{var_name}' no ha sido declarada. "
+        f"Declárala primero con VAR {var_name} = valor.",
+        context
+      ))
+
+    value = res.register(self.visit(node.value_node, context))
+    if res.should_return():
+      return res
+
+    if var_name in context.global_vars:
+      global_symbol_table.set(var_name, value)
+    else:
+      context.symbol_table.set(var_name, value)
+
     return res.success(value)
+
 
   def visit_BinOpNode(self, node, context):
     res = RTResult()

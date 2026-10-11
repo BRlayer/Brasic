@@ -1,81 +1,132 @@
-# Brasic 1.0 --- Manual de uso
+# Brasic 1.1 — Manual de uso
 
-> **Estado del documento:** manual inicial de Brasic 1.0, preparado a
-> partir del código fuente compartido. Algunas construcciones del parser
-> y del lexer tienen inconsistencias; se señalan en la sección
-> [Limitaciones conocidas](#limitaciones-conocidas).
+> **Estado del documento:** manual de uso de Brasic 1.1.0. Describe el funcionamiento del lenguaje, el intérprete y la consola interactiva. Las limitaciones conocidas se recogen al final del documento.
 
 ## Índice
 
-1.  [¿Qué es Brasic?](#qué-es-brasic)
-2.  [Cómo ejecutar Brasic](#cómo-ejecutar-brasic)
-3.  [Sintaxis básica](#sintaxis-básica)
-4.  [Variables y tipos de datos](#variables-y-tipos-de-datos)
-5.  [Operadores](#operadores)
-6.  [Condicionales](#condicionales)
-7.  [Bucles](#bucles)
-8.  [Funciones definidas por el
-    usuario](#funciones-definidas-por-el-usuario)
-9.  [Funciones integradas](#funciones-integradas)
-10. [Constantes integradas](#constantes-integradas)
-11. [Listas](#listas)
-12. [Comentarios y cadenas de texto](#comentarios-y-cadenas-de-texto)
-13. [Errores](#errores)
-14. [Programa de ejemplo](#programa-de-ejemplo)
-15. [Limitaciones conocidas](#limitaciones-conocidas)
+1. [¿Qué es Brasic?](#qué-es-brasic)
+2. [Cómo ejecutar Brasic](#cómo-ejecutar-brasic)
+   - [Abrir la consola interactiva](#abrir-la-consola-interactiva)
+   - [Comandos de la consola](#abrir-la-consola-interactiva)
+   - [Ejecutar un archivo](#ejecutar-un-archivo)
+3. [Sintaxis básica](#sintaxis-básica)
+4. [Variables y tipos de datos](#variables-y-tipos-de-datos)
+   - [Crear una variable](#crear-una-variable)
+   - [Tipos de datos](#tipos-de-datos)
+5. [Operadores](#operadores)
+   - [Operadores aritmeticos](#aritméticos)
+   - [Operadores de comparación](#comparación)
+   - [Operadores lógicos](#operadores-lógicos)
+6. [Condicionales](#condicionales)
+   - [SI](#si)
+7. [Bucles](#bucles)
+   - [MIENTRAS](#mientras)
+   - [PARA](#para-hasta-y-paso)
+   - [SALIR y CONTINUAR](#salir-y-continuar)
+8. [Funciones](#funciones)
+   - [Funciones definidas por el usuario](#funciones-definidas-por-el-usuario)
+   - [Funciones integradas](#funciones-integradas)
+9. [Constantes integradas](#constantes-integradas)
+10. [Listas](#listas)
+11. [Comentarios y cadenas de texto](#comentarios-y-cadenas-de-texto)
+12. [Errores](#errores)
+13. [Programa de ejemplo](#programa-de-ejemplo)
 
-------------------------------------------------------------------------
+------------------------------------------
 
 ## ¿Qué es Brasic?
 
-Brasic es un lenguaje interpretado. El intérprete procesa el código
-fuente, analiza su sintaxis y ejecuta las instrucciones sin generar
-previamente un ejecutable independiente.
+Brasic es un lenguaje de programación interpretado, diseñado para facilitar el aprendizaje de los fundamentos de la programación, especialmente a quienes se inician en ella y prefieren utilizar palabras clave en español.
 
-La implementación actual incluye números, cadenas de texto, listas,
-variables, operaciones aritméticas y de comparación, condicionales,
-bucles, funciones y funciones integradas para entrada/salida y
-manipulación de listas.
+El intérprete analiza el código fuente y ejecuta las instrucciones sin generar previamente un ejecutable independiente.
+
+La implementación incluye variables, números, cadenas de texto, listas, operaciones aritméticas y de comparación, condicionales, bucles, funciones definidas por el usuario y funciones integradas.
+
+Brasic está desarrollado en Python y permite aprender conceptos fundamentales de los lenguajes de programación mediante una sintaxis propia.
 
 ## Cómo ejecutar Brasic
 
 ### Abrir la consola interactiva
 
-Desde la terminal, ejecuta el archivo de la consola:
+Desde una terminal, sitúate en el directorio del proyecto y ejecuta:
 
-``` bash
+```bash
+python3 shell.py
+```
+
+En Windows, puedes utilizar:
+
+```bash
 python shell.py
 ```
 
-La consola muestra un prompt parecido a:
+La consola muestra el siguiente indicador:
 
-``` text
+```text
 brasic_console >
 ```
 
 Escribe una instrucción y pulsa Enter. Por ejemplo:
 
-``` text
+```bras
 brasic_console > IMPRIMIR("Hola, mundo")
 Hola, mundo
 ```
 
+La consola permite ejecutar instrucciones individualmente sin necesidad de crear un archivo para cada prueba.
+
+### Comandos de la consola
+
+La consola incluye comandos propios que facilitan su utilización. Estos comandos se procesan en `shell.py` y no forman parte de la sintaxis general del lenguaje Brasic.
+
+#### `AYUDA`
+
+Muestra el enlace al manual de Brasic para consultar la sintaxis, las instrucciones y los ejemplos disponibles.
+
+```text
+brasic_console > AYUDA
+
+Manual de Brasic:
+[enlace al manual]
+```
+
+El enlace mostrado depende de la URL configurada en `shell.py`.
+
+#### `SALIR`
+
+Cierra la consola interactiva y termina el bucle principal de `shell.py`.
+
+```text
+brasic_console > SALIR
+
+Cerrando Brasic...
+```
+
+Este comando sirve para terminar la sesión de la consola de forma controlada.
+
+#### `LIMPIAR`
+
+Limpia la pantalla de la consola, según la implementación disponible.
+
+```text
+brasic_console > LIMPIAR
+```
+
+**Importante:** los comandos `AYUDA` y `SALIR` son comandos de la consola. No deben confundirse con funciones del lenguaje que se utilizan dentro de un programa.
+
 ### Ejecutar un archivo
 
-La función integrada `EJECUTAR` permite cargar y ejecutar un archivo:
+La función integrada `EJECUTAR` permite cargar y ejecutar un archivo de Brasic:
 
-``` text
+```bras
 EJECUTAR("programa.bras")
 ```
 
-En la implementación compartida, `EJECUTAR` abre la ruta indicada y pasa
-el contenido al intérprete. La comprobación de que la extensión sea
-`.bras` debe estar incorporada en la versión de `execute_run()` para que
-se rechacen otras extensiones.
+El archivo debe tener la extensión `.bras`.
 
-Las rutas relativas se resuelven respecto al directorio de trabajo desde
-el que se ha iniciado Brasic. Si el archivo no se encuentra o no se
-puede leer, se devuelve un error de ejecución.
+Las rutas relativas se resuelven respecto al directorio de trabajo desde el que se ha iniciado Brasic. Si el archivo no existe o no puede leerse, se produce un error de ejecución.
+
+---
 
 ## Sintaxis básica
 
@@ -332,9 +383,11 @@ mayor.
 Estas instrucciones están implementadas en el intérprete para los bucles
 `PARA` y `MIENTRAS`.
 
-## Funciones definidas por el usuario
+## Funciones
 
-### Función de una sola expresión
+### Funciones definidas por el usuario
+
+#### Función de una sola expresión
 
 Se puede definir una función con `FUN`, parámetros entre paréntesis y
 `->` seguido de una expresión:
@@ -347,7 +400,7 @@ IMPRIMIR(doble(5))
 
 La expresión después de `->` se devuelve automáticamente.
 
-### Funciones con varios parámetros
+#### Funciones con varios parámetros
 
 ``` bras
 FUN sumar(a, b) -> a + b
@@ -355,7 +408,7 @@ FUN sumar(a, b) -> a + b
 IMPRIMIR(sumar(3, 4))
 ```
 
-### `DEVOLVER`
+#### `DEVOLVER`
 
 Dentro de una función, `DEVOLVER` permite devolver un valor
 explícitamente:
@@ -377,7 +430,7 @@ FUN(x) -> x * 2
 El uso de funciones anónimas como valores depende de cómo se asignen y
 se pasen en el programa.
 
-## Funciones integradas
+### Funciones integradas
 
 Los nombres siguientes están registrados en la tabla global de símbolos
 del código compartido. Los argumentos se pasan entre paréntesis y se
@@ -643,20 +696,3 @@ IMPRIMIR(total)
 El ejemplo ilustra el acceso a elementos mediante `lista / indice` y el
 uso de `LARGO`. En la versión actual, conviene probarlo después de
 corregir los operadores de comparación que utiliza el bucle.
-
-## Limitaciones conocidas
-
-Este apartado recoge inconsistencias visibles en el código fuente
-compartido. No son características deseables del lenguaje; son puntos
-que conviene corregir antes de declarar la versión 1.0 estable.
-
-1.  **Funciones multilínea:** el parser comprueba `END`, mientras que el
-    resto de la sintaxis y los mensajes indican `FIN`.
-2.  **Comentarios al final del archivo:** `skip_comment()` puede seguir
-    avanzando después de llegar al final del texto si no hay un salto de
-    línea.
-3.  **Identificadores con `Ñ`:** el lexer usa letras ASCII; nombres como
-    `AÑADIR` pueden no tokenizarse correctamente.
-4.  **Limpieza de consola:** `LIMPIAR()` ejecuta `cls` tanto en Windows
-    como en otros sistemas; en Linux normalmente debería ejecutarse
-    `clear`.
