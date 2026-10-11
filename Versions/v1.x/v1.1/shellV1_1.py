@@ -1,7 +1,7 @@
 import brasicV1_1
 
 VERSION = "v1.1"
-MANUAL_URL = "PEGA_AQUI_EL_ENLACE_DEL_MANUAL"
+MANUAL_URL = "https://github.com/BRlayer/Brasic/blob/main/Versions/v1.x/v1.1/MANUALv1_1.md"
 
 while True:
 	print()

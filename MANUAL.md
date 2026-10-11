@@ -190,6 +190,15 @@ VAR resultado = 12 * 2
 IMPRIMIR(resultado)
 ```
 
+Para modificar una variable ya creada no hace falta volver a usar `VAR`
+
+```bras
+VAR num1 = 5
+VAR num2 = 5
+num1 = num1 + num2
+```
+
+
 ### Tipos de datos
 
   -----------------------------------------------------------------------
@@ -389,11 +398,11 @@ Estas instrucciones están implementadas en el intérprete para los bucles
 
 #### Función de una sola expresión
 
-Se puede definir una función con `FUN`, parámetros entre paréntesis y
+Se puede definir una función con `FUNCION`, parámetros entre paréntesis y
 `->` seguido de una expresión:
 
 ``` bras
-FUN doble(n) -> n * 2
+FUNCION doble(n) -> n * 2
 
 IMPRIMIR(doble(5))
 ```
@@ -403,7 +412,7 @@ La expresión después de `->` se devuelve automáticamente.
 #### Funciones con varios parámetros
 
 ``` bras
-FUN sumar(a, b) -> a + b
+FUNCION sumar(a, b) -> a + b
 
 IMPRIMIR(sumar(3, 4))
 ```
@@ -414,17 +423,36 @@ Dentro de una función, `DEVOLVER` permite devolver un valor
 explícitamente:
 
 ``` bras
-FUN cuadrado(n) ->
+FUNCION cuadrado(n) ->
     DEVOLVER n * n
 FIN
 ```
+
+#### `GLOBAL`
+
+Dentro de una función, `GLOBAL` permite acceder y modificar el
+valor de una variable fuera de la función
+
+```bras
+VAR contador = 0
+
+FUNCION contar()
+    GLOBAL contador
+    contador = contador + 1
+FIN
+
+contar()
+IMPRIMIR(contador)
+```
+En este caso, GLOBAL contador indica que queremos utilizar la variable global contador. 
+Cuando se ejecuta la función, su valor aumenta de 0 a 1, y al imprimirlo se muestra el valor actualizado.
 
 ### Funciones anónimas
 
 El parser admite definiciones sin nombre, por ejemplo:
 
 ``` bras
-FUN(x) -> x * 2
+FUNCION(x) -> x * 2
 ```
 
 El uso de funciones anónimas como valores depende de cómo se asignen y
@@ -515,6 +543,11 @@ separan con comas.
                                                  código de un      
                                                  archivo.          
   --------------------------------------------------------------------------------------------------
+
+#### Funciones integradas para la consola
+Si tienes abiarta la consola puede ejecutar las siguientes funciones:
+* `SALIR` - Salir de la consola
+* `AYUDA` - Enlace al manual de la versión correspondiente
 
 ### Detalles importantes de las funciones integradas
 
