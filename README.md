@@ -6,6 +6,8 @@ El proyecto busca ofrecer una forma más intuitiva de comprender cómo funciona 
 
 > Brasic no pretende sustituir a Python ni a otros lenguajes establecidos. Su propósito es servir como punto de partida para comprender sus fundamentos y facilitar la transición hacia lenguajes más complejos.
 
+> Recomiendo instalar o la extensión de VS Code o el archivo de la rama MAIN. Si descargas desde los releases puede estar desactualizado porque puede no contener los bug-fixes.
+
 ## ¿Por qué se ha creado?
 
 Aprender a programar puede resultar complicado al principio. Además de comprender la lógica y resolver problemas, los principiantes deben familiarizarse con una sintaxis nueva, conceptos abstractos y palabras clave que no siempre les resultan intuitivas.
