@@ -2,10 +2,11 @@
 
 ## Versiones Compatibles
 
-Brasic se encuentra actualmente en su primera versión oficial, la V1.0. Las actualizaciones de seguridad se centrarán en la versión compatible que se indica a continuación.
+Brasic se encuentra actualmente en su primera versión oficial, la V1.1. Las actualizaciones de seguridad se centrarán en la versión compatible que se indica a continuación.
 
 | Version | Supported          |
 | ------- | ------------------ |
+|   1.1   | :white_check_mark: |
 |   1.0   | :white_check_mark: |
 | < 1.0   | :x:                |
 
