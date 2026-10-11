@@ -3,3 +3,7 @@ __pycache__/
 
 *.bras
 *.txt
+
+*.bak
+
+test_*.py
